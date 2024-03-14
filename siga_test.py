@@ -38,7 +38,7 @@ def iniciar_agendamento():
     # Clicar no botão "Iniciar"
     iniciar_button.click()
 
-    print("Botão 'Iniciar' clicado com sucesso!")
+    print("Botão 'Iniciar' clicado com sucesso! -- OK")
 
 
 def insere_texto_pesquisa():
@@ -50,7 +50,7 @@ def insere_texto_pesquisa():
     # Inserir o texto "renovação de residencia" no campo de pesquisa
     pesquisa_input.send_keys("Residence permit")
 
-    print("Texto inserido com sucesso no campo de pesquisa!")
+    print("Inserir residence no campo pesquisa! -- OK")
 
 
 def seleciona_pesquisar():
@@ -62,7 +62,7 @@ def seleciona_pesquisar():
     # Clicar no botão de pesquisa
     pesquisar_assunto_button.click()
 
-    print("Botão de pesquisa clicado com sucesso!")
+    print("Clicar no botão pesquisar! -- OK")
 
 
 def seleciona_resultado_pesquisa():
@@ -74,7 +74,7 @@ def seleciona_resultado_pesquisa():
     # Clicar no botão de seleção
     selecionar_button.click()
 
-    print("Botão selecionar clicado com sucesso!")
+    print("Selecionar Autorização de recidencia! -- OK")
 
 
 def avanca_pagina_intermediaria():
@@ -86,32 +86,40 @@ def avanca_pagina_intermediaria():
     # Clicar no botão 'proximoButton'
     next_button.click()
 
-    print("Botão 'Next' clicado com sucesso!")
+    print("Avançar pagina intermediaria! -- OK")
 
 
 def seleciona_distrito(p_distrito):
     # Aguardar até que o elemento 'IdDistrito' seja visível
+    
     id_distrito_select = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.ID, 'IdDistrito'))
     )
-
+    
     select = Select(id_distrito_select)
-    select.select_by_visible_text(p_distrito)
-
-    print('Opção ' + p_distrito + ' selecionada com sucesso!'
+    
+    try:
+        select.select_by_visible_text(p_distrito)
+        print('Opção ' + p_distrito + ' selecionada com sucesso! -- OK'
           )
+    except:
+        print('Distrito não encontrado: ' + p_distrito + ' -- NOK')
+
+
+    
 
 
 def seleciona_localidade(p_localidade):
+    
     id_localidade = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.ID, 'IdLocalidade'))
     )
-
+        
     select = Select(id_localidade)
     time.sleep(1)
     select.select_by_visible_text(p_localidade)
-    print('Opção ' + p_localidade + ' selecionada com sucesso!'
-          )
+    print('Opção ' + p_localidade + ' selecionada com sucesso! -- OK')
+    
 
 
 def seleciona_local_atendimento(p_local_atendimento):
@@ -173,6 +181,8 @@ def verifica_lisboa(p_distrito, p_localidade):
 
 # Start Lisboa / TODAS AS LOCALIDADES
 driver = start_chrome()
+
+
 verifica_lisboa('LISBOA', 'ALL PLACES')
 
 
