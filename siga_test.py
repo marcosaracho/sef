@@ -102,14 +102,14 @@ def seleciona_distrito(p_distrito):
         try:
             select.select_by_visible_text(p_distrito)
             print('Opção ' + p_distrito + ' selecionada com sucesso! -- OK')
-        
+            return True
         except NoSuchElementException:
-           print('Texto não encontrado nas opções: ' + p_distrito + ' -- NOK')
-
+            print('Texto não encontrado nas opções: ' + p_distrito + ' -- NOK')
+            return False
         
     except TimeoutException:
         print('Distrito não encontrado: ' + p_distrito + ' -- NOK')
-
+        return False
 
     
 
@@ -190,8 +190,8 @@ def verifica_lisboa(p_distrito, p_localidade):
         seleciona_pesquisar()
         seleciona_resultado_pesquisa()
         avanca_pagina_intermediaria()
-        seleciona_distrito(p_distrito)
-        if seleciona_localidade(p_localidade):
+        if seleciona_distrito(p_distrito):
+            seleciona_localidade(p_localidade)
             avanca_para_ultima_pagina()
             valida_message_error(p_localidade)
         else:    
