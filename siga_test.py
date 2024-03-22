@@ -2,6 +2,7 @@ import time
 import unittest
 
 import self as self
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
@@ -91,18 +92,22 @@ def avanca_pagina_intermediaria():
 
 def seleciona_distrito(p_distrito):
     # Aguardar até que o elemento 'IdDistrito' seja visível
-    
-    id_distrito_select = WebDriverWait(driver, 20).until(
-        EC.visibility_of_element_located((By.ID, 'IdDistrito'))
-    )
-    
-    select = Select(id_distrito_select)
-    
     try:
-        select.select_by_visible_text(p_distrito)
-        print('Opção ' + p_distrito + ' selecionada com sucesso! -- OK'
-          )
-    except:
+        id_distrito_select = WebDriverWait(driver, 20).until(
+            EC.visibility_of_element_located((By.ID, 'IdDistrito'))
+        )
+        
+        select = Select(id_distrito_select)
+        
+        try:
+            select.select_by_visible_text(p_distrito)
+            print('Opção ' + p_distrito + ' selecionada com sucesso! -- OK')
+        
+        except NoSuchElementException:
+           print('Texto não encontrado nas opções: ' + p_distrito + ' -- NOK')
+
+        
+    except TimeoutException:
         print('Distrito não encontrado: ' + p_distrito + ' -- NOK')
 
 
@@ -110,31 +115,46 @@ def seleciona_distrito(p_distrito):
 
 
 def seleciona_localidade(p_localidade):
-    
-    id_localidade = WebDriverWait(driver, 20).until(
-        EC.visibility_of_element_located((By.ID, 'IdLocalidade'))
-    )
-        
-    select = Select(id_localidade)
-    time.sleep(1)
-    select.select_by_visible_text(p_localidade)
-    print('Opção ' + p_localidade + ' selecionada com sucesso! -- OK')
-    
+    try:
+        id_localidade = WebDriverWait(driver, 20).until(
+            EC.visibility_of_element_located((By.ID, 'IdLocalidade'))
+        )
+            
+        select = Select(id_localidade)
+        time.sleep(1)
+
+        try:
+            select.select_by_visible_text(p_localidade)
+            print('Opção ' + p_localidade + ' selecionada com sucesso! -- OK')
+        except NoSuchElementException:
+            print('Localidade não encontrado: ' + p_localidade + ' -- NOK')
+
+    except TimeoutException:
+        print('Localidade não encontrado: ' + p_localidade + ' -- NOK')
 
 
 def seleciona_local_atendimento(p_local_atendimento):
     # Aguardar até que o elemento 'IdLocalAtendimento' seja visível
-    id_local_atendimento_select = WebDriverWait(driver, 20).until(
-        EC.visibility_of_element_located((By.ID, 'IdLocalAtendimento'))
-    )
+    try:
+        id_local_atendimento_select = WebDriverWait(driver, 20).until(
+            EC.visibility_of_element_located((By.ID, 'IdLocalAtendimento'))
+        )
+        try:
+            select_local_atendimento = Select(id_local_atendimento_select)
+            time.sleep(1)
+            select_local_atendimento.select_by_visible_text(p_local_atendimento)
 
-    select_local_atendimento = Select(id_local_atendimento_select)
-    time.sleep(1)
-    select_local_atendimento.select_by_visible_text(p_local_atendimento)
-
-    print('Opção ' + p_local_atendimento + ' selecionada com sucesso!')
-
-
+            print('Opção ' + p_local_atendimento + ' selecionada com sucesso!')
+            return True
+        
+        except NoSuchElementException:
+            print('Local Atendimento não encontrado: ' + p_local_atendimento + ' -- NOK')
+            return False
+    
+    except TimeoutException:
+        print('Local Atendimento não encontrado: ' + p_local_atendimento + ' -- NOK')
+        return False
+    
 def avanca_para_ultima_pagina():
     last_button = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.XPATH, "//*[contains(text(), 'Next')]"))
@@ -171,10 +191,11 @@ def verifica_lisboa(p_distrito, p_localidade):
         seleciona_resultado_pesquisa()
         avanca_pagina_intermediaria()
         seleciona_distrito(p_distrito)
-        seleciona_localidade(p_localidade)
-        avanca_para_ultima_pagina()
-        valida_message_error(p_localidade)
-        print('')
+        if seleciona_localidade(p_localidade):
+            avanca_para_ultima_pagina()
+            valida_message_error(p_localidade)
+        else:    
+            print('Opções não disponiveis no Portal Siga, finalizando busca sem sucesso')
     finally:
         close_chrome()
 
