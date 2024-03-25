@@ -15,6 +15,7 @@ def start_chrome():
 
     options = webdriver.ChromeOptions()
     options.add_argument("--start-maximized")  # Opcional: maximizar a janela do navegador
+    #options.add_argument("--headless") 
 
     # Inicializar o navegador Chrome
     driver = webdriver.Chrome(options=options)
@@ -68,15 +69,27 @@ def seleciona_pesquisar():
 
 def seleciona_resultado_pesquisa():
     # elemento do botao de resultado da pesquisa
-    selecionar_button = WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.CLASS_NAME, 'btn-pesquisa-results'))
-    )
+    
+    try:
+        selecionar_button = WebDriverWait(driver, 5).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'btn-pesquisa-results'))
+        )
 
-    # Clicar no botão de seleção
-    selecionar_button.click()
-
-    print("Selecionar Autorização de recidencia! -- OK")
-
+        try:
+        
+            # Clicar no botão de seleção
+            selecionar_button.click()
+            print("Selecionar Autorização de recidencia! -- OK")
+            return True
+        
+        except NoSuchElementException:
+            print('Botao Next nao encontrado / falha na pesquisa -- NOK')
+            return False
+        
+    except TimeoutException:
+        print('Pesquisa nao retornou retultado -- NOK')
+        return False
+    
 
 def avanca_pagina_intermediaria():
     # Aguardar até que o botão 'proximoButton' seja visível
@@ -188,14 +201,17 @@ def verifica_lisboa(p_distrito, p_localidade):
         iniciar_agendamento()
         insere_texto_pesquisa()
         seleciona_pesquisar()
-        seleciona_resultado_pesquisa()
-        avanca_pagina_intermediaria()
-        if seleciona_distrito(p_distrito):
-            seleciona_localidade(p_localidade)
-            avanca_para_ultima_pagina()
-            valida_message_error(p_localidade)
-        else:    
-            print('Opções não disponiveis no Portal Siga, finalizando busca sem sucesso')
+        if seleciona_resultado_pesquisa():
+            avanca_pagina_intermediaria()
+            if seleciona_distrito(p_distrito):
+                seleciona_localidade(p_localidade)
+                avanca_para_ultima_pagina()
+                valida_message_error(p_localidade)
+            else:    
+                print('Opções não disponiveis no Portal Siga, finalizando busca sem sucesso')
+        else:
+            print( ' --- Falha na pesquisa "Residence Permit" --- ')
+        
     finally:
         close_chrome()
 
