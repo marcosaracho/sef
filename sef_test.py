@@ -11,10 +11,10 @@ password = os.getenv('PASSWORD_SEF')
 
 
 def start_chrome():
-    driver_path = 'driver/chromedriver'  # ou o caminho para o driver do navegador que você está usando
+    driver_path = 'driver/chromedriver'
 
     options = webdriver.ChromeOptions()
-    options.add_argument("--start-maximized")  # Opcional: maximizar a janela do navegador
+    options.add_argument("--start-maximized")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--disable-infobars")
     options.add_argument("--disable-popup-blocking")
@@ -116,23 +116,39 @@ def verifica_mensagem():
         menssagem_erro_label = WebDriverWait(driver, 20).until(
             EC.visibility_of_element_located((By.ID, 'ctl00_ctl53_g_948e31d8_a34a_4c4d_aa9f_c457786c05b7_ctl00_lblPostosEmpty'))
         )
-        
-        if menssagem_erro_label.text == 'De momento, não existe disponibilidade nos postos de atendimento para o serviço selecionado.':
-            print('Não existe disponibilidade para o serviço selecionado. -- NOK')
-        else:
-            print('Existe disponibilidade para o serviço selecionado. -- OK')
 
-    except TimeoutException:
-        print('Mensagem de erro não exibida -- NOK')
-        return False
+        assert menssagem_erro_label.text == 'De momento, não existe disponibilidade nos postos de atendimento para o serviço selecionado.', \
+            'Mensagem de erro não corresponde ao esperado.'
+        print('Não existe disponibilidade para o serviço selecionado. -- OK')
+
+    except Exception as e:
+        print(f'Erro durante a verificação da mensagem: {str(e)} -- NOK')
+        raise AssertionError('Falha ao verificar a mensagem de erro.')
 
 
 # Cenários de teste
 def exec_test_full():
+    max_attempts = 4
+    attempts = 0
+
+    while attempts < max_attempts:
+        try:
+            iniciar_login()
+            insert_user_pass()
+            select_login_button()
+            break
+        except Exception as e:
+            attempts += 1
+            print(f"Tentativa {attempts} falhou: {str(e)} -- Retentando...")
+            close_chrome()
+            start_chrome()
+
+            if attempts >= max_attempts:
+                print("Número máximo de tentativas atingido. Teste falhou.")
+                raise
+
     try:
-        iniciar_login()
-        insert_user_pass()
-        select_login_button()
+
         select_agendamento()
         novo_agendamento()
         verifica_mensagem()
