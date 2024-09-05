@@ -8,9 +8,11 @@ from selenium.webdriver.support import expected_conditions as EC
 
 username = os.getenv('USERNAME_SEF')
 password = os.getenv('PASSWORD_SEF')
+driver = None
 
 
 def start_chrome():
+    global driver
     driver_path = 'driver/chromedriver'
 
     options = webdriver.ChromeOptions()
@@ -31,13 +33,15 @@ def start_chrome():
     # URL do site
     url = 'https://www.sef.pt/pt/Pages/Homepage.aspx'
 
-    # Abrir a URL no navegador
     driver.get(url)
+    print('Navegador iniciado')
     return driver
 
 
 def close_chrome():
+    global driver
     driver.quit()
+    print("Navegador fechado.")
 
 
 def iniciar_login():
@@ -126,6 +130,9 @@ def verifica_mensagem():
         raise AssertionError('Falha ao verificar a mensagem de erro.')
 
 
+
+
+
 # Cenários de teste
 def exec_test_full():
     max_attempts = 4
@@ -133,6 +140,8 @@ def exec_test_full():
 
     while attempts < max_attempts:
         try:
+            print(f"Tentativa {attempts + 1} de {max_attempts}...")
+            start_chrome()
             iniciar_login()
             insert_user_pass()
             select_login_button()
@@ -141,7 +150,6 @@ def exec_test_full():
             attempts += 1
             print(f"Tentativa {attempts} falhou: {str(e)} -- Retentando...")
             close_chrome()
-            start_chrome()
 
             if attempts >= max_attempts:
                 print("Número máximo de tentativas atingido. Teste falhou.")
@@ -156,7 +164,7 @@ def exec_test_full():
         close_chrome()
 
 
-driver = start_chrome()
+#driver = start_chrome()
 
 exec_test_full()
 
