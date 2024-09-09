@@ -24,8 +24,9 @@ def start_chrome():
     options.add_argument("--no-first-run")
     options.add_argument("--no-default-browser-check")
     options.add_argument("--disable-extensions")
+    options.add_argument("--disable-search-engine-choice-screen")
     options.add_argument("--incognito")
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
 
     # Inicializar o navegador Chrome
     driver = webdriver.Chrome(options=options)
